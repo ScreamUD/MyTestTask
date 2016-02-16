@@ -161,6 +161,6 @@ class Searcher
 }
 
 $s = new Searcher();
-$result = $s->getFiles(Searcher::FORMAT_ARRAY, __DIR__ . '/data');
+$result = $s->getFiles(Searcher::FORMAT_JSON, __DIR__ . '/data');
 
-//var_dump($result);
+var_dump($result);
