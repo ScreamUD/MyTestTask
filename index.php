@@ -93,23 +93,18 @@ class Searcher
         /** @var DirectoryIterator $file */
         foreach ($this->getIterator($path) as $file) {
 
-            if (!$file->isDir()) {
-                continue;
+            if(!$file->isDir() || in_array($file->getFilename(), array('.', '..')))
+            {
+                $children = $this->getChildrenFiles($path . '/' . $file->getFilename());
+
+                $size = $this->getDirectorySize($path . '/' . $file->getFilename());
+
+                $result[$file->getFilename()] = array(
+                    'size' => $this->getFormattedResult($size),
+                    'filesCount' => count($children),
+                    'duplicatesCount' => $this->getDuplicateCount($path.'/'.$file->getFilename(), $children),
+                );
             }
-
-            if (in_array($file->getFilename(), array('.', '..'))) {
-                continue;
-            }
-
-            $children = $this->getChildrenFiles($path . '/' . $file->getFilename());
-
-            $size = $this->getDirectorySize($path . '/' . $file->getFilename());
-
-            $result[$file->getFilename()] = array(
-                'size' => $this->getFormattedResult($size),
-                'filesCount' => count($children),
-                'duplicatesCount' => $this->getDuplicateCount($path.'/'.$file->getFilename(), $children),
-            );
         }
 
         uasort($result, function ($left, $right) {
