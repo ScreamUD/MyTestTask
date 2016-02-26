@@ -93,7 +93,7 @@ class Searcher
         /** @var DirectoryIterator $file */
         foreach ($this->getIterator($path) as $file) {
 
-            if(!$file->isDir() || in_array($file->getFilename(), array('.', '..')))
+            if($file->isDir() || !in_array($file->getFilename(), array('.', '..')))
             {
                 $children = $this->getChildrenFiles($path . '/' . $file->getFilename());
 
