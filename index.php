@@ -63,23 +63,10 @@ class Searcher
     {
         $data = array();
         foreach ($files as $file) {
-            $data[] = array(
-                'size' => filesize($path.'/'.$file),
-                'md5' => md5_file($path.'/'.$file),
-            );
+            $data[] = filesize($path.'/'.$file) . '_' . md5_file($path.'/'.$file);
         }
 
-        $duplicateCount = 0;
-        for ($i = 0; $i < count($files) - 1; ++$i) {
-            for ($j = $i + 1; $j < count($files); ++$j) {
-                if ($data[$i]['size'] === $data[$j]['size'] &&
-                    $data[$i]['md5'] === $data[$j]['md5']) {
-                    $duplicateCount++;
-                }
-            }
-        }
-
-        return $duplicateCount;
+        return count($data) - count(array_unique($data));
     }
 
     /**
@@ -93,7 +80,7 @@ class Searcher
         /** @var DirectoryIterator $file */
         foreach ($this->getIterator($path) as $file) {
 
-            if($file->isDir() || !in_array($file->getFilename(), array('.', '..')))
+            if($file->isDir() && !in_array($file->getFilename(), array('.', '..')))
             {
                 $children = $this->getChildrenFiles($path . '/' . $file->getFilename());
 
@@ -128,30 +115,17 @@ class Searcher
      * @param int $bytes
      * @return string
      */
-    function getFormattedResult($bytes)
+    private function getFormattedResult($bytes)
     {
-        $kb = 1024;
-        $mb = $kb * 1024;
-        $gb = $mb * 1024;
-        $tb = $gb * 1024;
+        $unit = array('B', 'KB', 'MB', 'GB', 'TB');
 
-        if (($bytes >= 0) && ($bytes < $kb)) {
-            return $bytes . ' B';
-
-        } elseif (($bytes >= $kb) && ($bytes < $mb)) {
-            return ceil($bytes / $kb) . ' KB';
-
-        } elseif (($bytes >= $mb) && ($bytes < $gb)) {
-            return ceil($bytes / $mb) . ' MB';
-
-        } elseif (($bytes >= $gb) && ($bytes < $tb)) {
-            return ceil($bytes / $gb) . ' GB';
-
-        } elseif ($bytes >= $tb) {
-            return ceil($bytes / $tb) . ' TB';
-        } else {
-            return $bytes . ' B';
+        for ($val = 1, $i = 0;; $val *= 1024, ++$i) {
+            if ($bytes < $val * 1024) {
+                return ceil($bytes / $val) . ' ' . $unit[$i];
+            }
         }
+
+        return 0 . ' ' . $unit[0];
     }
 }
 
